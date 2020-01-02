@@ -122,20 +122,38 @@ def decomposeImage():
 
     _thread.start_new_thread(download, ())
 
+
+def is_json(myjson):
+    try:
+        json.loads(myjson)
+    except ValueError:
+        return False
+
 # 分解
 def decompose(imgFilePath, jsonFilePath, outDir):
 
     insertDecomposeInfo('正在分解图片...')
+    insertDecomposeInfo(imgFilePath)
 
     rawImg = Image.open(imgFilePath)
     imgFrames = json.loads(open(jsonFilePath).read())['frames']
+    insertDecomposeInfo(imgFrames)
     for frame in imgFrames:
-        x = frame['frame']['x']
-        y = frame['frame']['y']
-        w = frame['frame']['w']
-        h = frame['frame']['h']
-        childImg = rawImg.crop((x, y, x + w, y + h))
-        childImg.save(outDir + os.sep + frame['filename'])
+        if is_json(frame):
+            x = frame['frame']['x']
+            y = frame['frame']['y']
+            w = frame['frame']['w']
+            h = frame['frame']['h']
+            childImg = rawImg.crop((x, y, x + w, y + h))
+            childImg.save(outDir + os.sep + frame['filename'])
+        else:
+            element = imgFrames[frame]
+            x = element['frame']['x']
+            y = element['frame']['y']
+            w = element['frame']['w']
+            h = element['frame']['h']
+            childImg = rawImg.crop((x, y, x + w, y + h))
+            childImg.save(outDir + os.sep + frame + ".png")
 
     insertDecomposeInfo('图片分解完成')
 
